@@ -1,0 +1,181 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile information",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "id": { "type": "string", "description": "8-digit unique ID" },
+        "email": { "type": "string", "format": "email" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "playedGameIds": { "type": "array", "items": { "type": "string" } },
+        "favoriteCategories": { "type": "array", "items": { "type": "string" } },
+        "friends": { "type": "array", "items": { "type": "string" } },
+        "allowFriendRequests": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "id", "email"]
+    },
+    "FriendRequest": {
+      "title": "FriendRequest",
+      "description": "Friend request between users",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "fromUid": { "type": "string" },
+        "fromName": { "type": "string" },
+        "fromPhoto": { "type": "string" },
+        "toUid": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "accepted", "declined"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["fromUid", "toUid", "status"]
+    },
+    "Chat": {
+      "title": "Chat",
+      "description": "Chat between users",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "participants": { "type": "array", "items": { "type": "string" } },
+        "lastMessage": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["participants"]
+    },
+    "ChatMessage": {
+      "title": "ChatMessage",
+      "description": "Message in a chat",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "senderUid": { "type": "string" },
+        "text": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["senderUid", "text"]
+    },
+    "GameInvitation": {
+      "title": "GameInvitation",
+      "description": "Invitation to play a game",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "fromUid": { "type": "string" },
+        "fromName": { "type": "string" },
+        "toUid": { "type": "string" },
+        "gameId": { "type": "string" },
+        "gameTitle": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "accepted", "declined"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["fromUid", "toUid", "gameId", "status"]
+    },
+    "Game": {
+      "title": "Game",
+      "description": "Game metadata and content",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "controls": { "type": "string" },
+        "category": { "type": "string" },
+        "thumbnailUrl": { "type": "string" },
+        "htmlContent": { "type": "string" },
+        "authorId": { "type": "string" },
+        "authorName": { "type": "string" },
+        "playCount": { "type": "number" },
+        "activeCount": { "type": "number" },
+        "likes": { "type": "number" },
+        "dislikes": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "adMobUnitId": { "type": "string" },
+        "isPublic": { "type": "boolean" },
+        "trendingScore": { "type": "number" },
+        "avgRating": { "type": "number" },
+        "ratingCount": { "type": "number" }
+      },
+      "required": ["title", "category", "htmlContent", "authorId", "isPublic", "trendingScore", "avgRating", "ratingCount"]
+    },
+    "Like": {
+      "title": "Like",
+      "description": "User like/dislike on a game",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "gameId": { "type": "string" },
+        "type": { "type": "string", "enum": ["like", "dislike"] }
+      },
+      "required": ["userId", "gameId", "type"]
+    },
+    "Comment": {
+      "title": "Comment",
+      "description": "User comment on a game",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "gameId": { "type": "string" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "userPhoto": { "type": "string" },
+        "text": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["gameId", "userId", "text"]
+    },
+    "Rating": {
+      "title": "Rating",
+      "description": "User rating on a game",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "gameId": { "type": "string" },
+        "userId": { "type": "string" },
+        "value": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["gameId", "userId", "value"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "/games/{gameId}": {
+      "schema": "Game",
+      "description": "Uploaded games"
+    },
+    "/likes/{likeId}": {
+      "schema": "Like",
+      "description": "User likes/dislikes"
+    },
+    "/comments/{commentId}": {
+      "schema": "Comment",
+      "description": "User comments"
+    },
+    "/ratings/{ratingId}": {
+      "schema": "Rating",
+      "description": "User ratings"
+    },
+    "/friendRequests/{requestId}": {
+      "schema": "FriendRequest",
+      "description": "Friend requests"
+    },
+    "/chats/{chatId}": {
+      "schema": "Chat",
+      "description": "User chats"
+    },
+    "/chats/{chatId}/messages/{messageId}": {
+      "schema": "ChatMessage",
+      "description": "Chat messages"
+    },
+    "/invitations/{invitationId}": {
+      "schema": "GameInvitation",
+      "description": "Game invitations"
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "projectId": "ignita-ai",
+  "appId": "1:128405376870:web:7ad3d56418fe621e6002a7",
+  "apiKey": "AIzaSyAJoNOImYGKTdBrWKBAL2A2YxH-VIbP1IA",
+  "authDomain": "ignita-ai.firebaseapp.com",
+  "firestoreDatabaseId": "ai-studio-c6155ec0-310c-459a-a722-563f7931b94d",
+  "storageBucket": "ignita-ai.firebasestorage.app",
+  "messagingSenderId": "128405376870",
+  "measurementId": ""
+}

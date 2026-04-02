@@ -1,0 +1,96 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    function isDocOwner() {
+      return isAuthenticated() && request.auth.uid == resource.data.authorId;
+    }
+    function isAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.email == "nothingnope07@gmail.com" ||
+        request.auth.token.email == "nothingnope15@gmail.com"
+      );
+    }
+
+    // User profiles
+    match /users/{userId} {
+      allow read: if true;
+      allow write: if isOwner(userId) || isAdmin();
+    }
+
+    // Games
+    match /games/{gameId} {
+      allow read: if resource.data.isPublic != false || isDocOwner() || isAdmin();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && (
+        isDocOwner() || 
+        isAdmin() || 
+        // Allow anyone to update specific stats fields (likes, playCount, etc.)
+        // but ONLY if they are not changing other fields.
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['playCount', 'activeCount', 'likes', 'dislikes', 'trendingScore', 'avgRating', 'ratingCount'])
+      );
+      allow delete: if isDocOwner() || isAdmin();
+    }
+
+    // Reports
+    match /reports/{reportId} {
+      allow read: if isAdmin();
+      allow create: if isAuthenticated();
+      allow update, delete: if isAdmin();
+    }
+
+    // Likes
+    match /likes/{likeId} {
+      allow read: if true;
+      allow write: if (isAuthenticated() && request.auth.uid == request.resource.data.userId) || isAdmin();
+    }
+
+    // Comments
+    match /comments/{commentId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && request.auth.uid == request.resource.data.userId;
+      allow update, delete: if (isAuthenticated() && request.auth.uid == resource.data.userId) || isAdmin();
+    }
+
+    // Ratings
+    match /ratings/{ratingId} {
+      allow read: if true;
+      allow write: if (isAuthenticated() && request.auth.uid == request.resource.data.userId) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Friend Requests
+    match /friendRequests/{requestId} {
+      allow read: if isAuthenticated() && (request.auth.uid == resource.data.fromUid || request.auth.uid == resource.data.toUid);
+      allow create: if isAuthenticated() && request.auth.uid == request.resource.data.fromUid;
+      allow update: if isAuthenticated() && (request.auth.uid == resource.data.fromUid || request.auth.uid == resource.data.toUid);
+      allow delete: if isAuthenticated() && (request.auth.uid == resource.data.fromUid || request.auth.uid == resource.data.toUid);
+    }
+
+    // Chats
+    match /chats/{chatId} {
+      allow read: if isAuthenticated() && request.auth.uid in resource.data.participants;
+      allow create: if isAuthenticated() && request.auth.uid in request.resource.data.participants;
+      allow update: if isAuthenticated() && request.auth.uid in resource.data.participants;
+      
+      match /messages/{messageId} {
+        allow read: if isAuthenticated() && request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants;
+        allow create: if isAuthenticated() && request.auth.uid == request.resource.data.senderUid;
+      }
+    }
+
+    // Invitations
+    match /invitations/{invitationId} {
+      allow read: if isAuthenticated() && (request.auth.uid == resource.data.fromUid || request.auth.uid == resource.data.toUid);
+      allow create: if isAuthenticated() && request.auth.uid == request.resource.data.fromUid;
+      allow update: if isAuthenticated() && (request.auth.uid == resource.data.fromUid || request.auth.uid == resource.data.toUid);
+      allow delete: if isAuthenticated() && (request.auth.uid == resource.data.fromUid || request.auth.uid == resource.data.toUid);
+    }
+  }
+}
